@@ -35,6 +35,12 @@ var isValidJSON = function(str) {
     return true;  
 };
 
+var selectedUsers = function(users, selection) {
+    return users.filter(function(u) {
+        return selection[u.id];
+    });
+};
+
 var togglBoard = angular.module('TogglBoard', ['ngDialog']);
 togglBoard.controller('TogglController', function($scope, $interval, ngDialog) {
 
@@ -42,9 +48,11 @@ togglBoard.controller('TogglController', function($scope, $interval, ngDialog) {
         users: []
     };
 
-    $scope.bulkStopAll = function() {
+    $scope.userIsSelected = {};
 
-        async.eachSeries($scope.userDataContainer.users,
+    $scope.bulkStopAll = function() {
+        var users = selectedUsers($scope.userDataContainer.users, $scope.userIsSelected);
+        async.eachSeries(users,
          function(user, callback) {
 
              if (user.doing_now === false) {
@@ -75,8 +83,9 @@ togglBoard.controller('TogglController', function($scope, $interval, ngDialog) {
     $scope.bulkStartAll = function() {
         var taskname = $scope.taskName;
         if (taskname && taskname.length > 0) {
-
-            async.eachSeries($scope.userDataContainer.users,
+            var users = selectedUsers($scope.userDataContainer.users,
+                                      $scope.userIsSelected);
+            async.eachSeries(users,
             function(user, callback) {
 
                 var apiToken = user.api_token;
@@ -256,6 +265,6 @@ togglBoard.controller('TogglController', function($scope, $interval, ngDialog) {
     };
 });
 
-Date.prototype.range = function(d) {
+Date.range = function(d) {
     return new Date().getTime() - d;
 };
